@@ -60,6 +60,7 @@ local orders = {}
 -- Blocksep is used to separate block elements.
 function Blocksep()
   return bullets[1] and "\n" or orders[1] and "\n" or "\n\n"
+--  return "\n\n"
 end
 
 -- This function is called once for the whole document. Parameters:
@@ -112,6 +113,7 @@ function Strong(s)
 end
 
 function Subscript(s)
+   -- return ",," .. s .. ",,"
    return s
 end
 
@@ -135,10 +137,13 @@ function Link(s, src, tit, attr)
       return "[[[[" .. escape(s) .. "]]>>" .. escape(src,true) .."]]"
    else
      return "[[" .. s .. ">>" .. escape(src,true) .."]]"
+     -- return "{{html}}<a href='" .. escape(src,true) .. "'>" .. s .."</a>{{/html}}"
   end
 end
 
 function Image(s, src, tit, attr)
+   -- return "<img src='" .. escape(src,true) .. "' title='" ..
+   --       escape(tit,true) .. "'/>"
    return src
 end
 
@@ -162,6 +167,8 @@ function Note(s)
   -- add a list item with the note to the note table.
   table.insert(notes, '1. ' .. s .. '')
   -- return the footnote reference, linked to the note.
+  -- return '<a id="fnref' .. num .. '" href="#fn' .. num ..
+  --           '"><sup>' .. num .. '</sup></a>'
   return '[[^^' .. num .. '^^>>||anchor="HFootnotes"]]'
 end
 
@@ -281,9 +288,13 @@ function html_align(align)
 end
 
 function CaptionedImage(src, tit, caption, attr)
-   return '<div class="figure">\n<img src="' .. escape(src,true) ..
-      '" title="' .. escape(tit,true) .. '"/>\n' ..
-      '<p class="caption">' .. caption .. '</p>\n</div>'
+   -- image file should be uploaded manually to wiki page to render
+   -- hopefully the API will support CLI uploading soon
+   local image_file = src:match(".+/(.*)$")
+   return '[[image:' .. escape(image_file,true) .. ']]'
+   --return '<div class="figure">\n<img src="' .. escape(src,true) ..
+   --   '" title="' .. escape(tit,true) .. '"/>\n' ..
+   --   '<p class="caption">' .. caption .. '</p>\n</div>'
 end
 
 -- Caption is a string, aligns is an array of strings,
@@ -294,7 +305,7 @@ function Table(caption, aligns, widths, headers, rows)
   local function add(s)
     table.insert(buffer, s)
   end
-  add("{{html}}")
+  add('{{html wiki="true}}')
   add("<table>")
   if caption ~= "" then
     add("<caption>" .. caption .. "</caption>")
